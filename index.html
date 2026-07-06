@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>InterventorAI - Sistema de Gestión e Interventoría</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --bg: #0f172a; --card-bg: #1e293b; --border: #334155; --text: #f8fafc; --text-muted: #94a3b8; --primary: #6366f1; --primary-hover: #4f46e5; --success: #10b981; --warning: #f59e0b; --danger: #ef4444; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background-color: var(--bg); color: var(--text); font-family: 'Outfit', sans-serif; padding-bottom: 40px; }
+    input, textarea, select { background-color: #0f172a; border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 10px 14px; font-size: 14px; outline: none; width: 100%; }
+    input:focus, textarea:focus, select:focus { border-color: var(--primary); }
+    button { background-color: var(--primary); border: none; border-radius: 8px; color: white; cursor: pointer; font-weight: 500; padding: 10px 18px; transition: all 0.2s; }
+    button:hover { background-color: var(--primary-hover); }
+    button:active { transform: scale(0.98); }
+    .btn-sec { background-color: var(--border); color: var(--text); margin-left: 8px; }
+    .btn-sec:hover { background-color: #475569; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+    .logo { font-size: 24px; font-weight: 700; color: var(--primary); }
+    .nav-links { display: flex; gap: 20px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; cursor: pointer; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .login-wrapper { display: flex; justify-content: center; align-items: center; min-height: 80vh; }
+    .login-card { background: rgba(30, 41, 59, 0.7); border: 1px solid var(--border); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; backdrop-filter: blur(10px); }
+    .login-card h2 { margin-bottom: 24px; text-align: center; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-size: 14px; color: var(--text-muted); }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 30px; }
+    .metric-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+    .metric-card h3 { font-size: 14px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+    .metric-card .val { font-size: 28px; font-weight: 700; }
+    .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th, td { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-muted); font-weight: 500; font-size: 14px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; text-transform: uppercase; }
+    .badge-activo { background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); color: var(--success); }
+    .badge-suspendido { background: rgba(245, 158, 11, 0.1); border: 1px solid var(--warning); color: var(--warning); }
+    .badge-terminado { background: rgba(148, 163, 184, 0.1); border: 1px solid var(--text-muted); color: var(--text-muted); }
+    .progress-bar-container { background: #334155; border-radius: 4px; height: 8px; width: 100px; overflow: hidden; margin-top: 4px; }
+    .progress-bar { background: var(--primary); height: 100%; }
+    .form-wrapper { max-width: 700px; margin: 0 auto; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .checkbox-group { display: flex; flex-direction: column; gap: 10px; border: 1px solid var(--border); border-radius: 8px; padding: 15px; max-height: 150px; overflow-y: auto; }
+    .checkbox-item { display: flex; align-items: center; gap: 10px; }
+    .checkbox-item input { width: auto; }
+    .print-btn-container { display: flex; justify-content: flex-end; margin-bottom: 20px; }
+    .hidden { display: none !important; }
+    @media print {
+      body { background: white; color: black; padding: 0; }
+      header, .print-btn-container, button, .nav-links { display: none !important; }
+      .card { border: none; padding: 0; background: white; }
+      th, td { border-bottom: 1px solid #ccc; color: black; }
+      .badge { border: 1px solid #000; background: transparent; color: black; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header id="app-header" class="hidden">
+      <div class="logo">✦ InterventorAI</div>
+      <nav><ul class="nav-links">
+        <li><a id="nav-dash" class="active" onclick="navigateTo('dashboard')">Contratos</a></li>
+        <li><a id="nav-contract" onclick="navigateTo('contract-form')">Nuevo Contrato</a></li>
+        <li><a id="nav-reports" onclick="navigateTo('reports')">Reportes</a></li>
+        <li><a id="nav-audit" onclick="navigateTo('audit')">Auditoría</a></li>
+        <li><a onclick="logout()">Cerrar Sesión</a></li>
+      </ul></nav>
+    </header>
+
+    <!-- 1. LOGIN -->
+    <section id="sec-login" class="login-wrapper">
+      <div class="login-card">
+        <h2 style="text-align:center;">Ingresar al Sistema</h2>
+        <div id="login-error" style="color: var(--danger); font-size:14px; margin-bottom:15px; text-align:center;" class="hidden"></div>
+        <form id="form-login" onsubmit="handleLogin(event)">
+          <div class="form-group"><label>Usuario</label><input type="text" id="username" required placeholder="admin"></div>
+          <div class="form-group"><label>Contraseña</label><input type="password" id="password" required placeholder="admin"></div>
+          <button type="submit" style="width: 100%;">Ingresar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 2. DASHBOARD -->
+    <section id="sec-dashboard" class="hidden">
+      <div class="metrics-grid">
+        <div class="metric-card"><h3>Total Contratos</h3><div class="val" id="metric-total-contracts">0</div></div>
+        <div class="metric-card"><h3>Presupuesto Total</h3><div class="val" id="metric-total-budget">$0</div></div>
+        <div class="metric-card"><h3>Avance Promedio</h3><div class="val" id="metric-avg-progress">0%</div></div>
+      </div>
+      <div class="card">
+        <h2 style="margin-bottom:20px;">Listado de Contratos</h2>
+        <table>
+          <thead><tr><th>Número</th><th>Contratista</th><th>Valor Total</th><th>Avance</th><th>Estado</th><th>Supervisores</th><th>Acciones</th></tr></thead>
+          <tbody id="contracts-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 3. CONTRACT FORM -->
+    <section id="sec-contract-form" class="hidden form-wrapper">
+      <div class="card">
+        <h2 id="form-contract-title" style="margin-bottom:24px;">Registrar Nuevo Contrato</h2>
+        <form id="form-contract" onsubmit="submitContractForm(event)">
+          <input type="hidden" id="c-id">
+          <div class="form-row">
+            <div class="form-group"><label>Número</label><input type="text" id="c-numero" required></div>
+            <div class="form-group"><label>Contratista</label><input type="text" id="c-contratista" required></div>
+          </div>
+          <div class="form-group"><label>Objeto</label><textarea id="c-objeto" rows="3" required></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>Fecha Inicio</label><input type="date" id="c-inicio" required></div>
+            <div class="form-group"><label>Fecha Fin</label><input type="date" id="c-fin" required></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Valor Total</label><input type="number" id="c-valor" required></div>
+            <div class="form-group"><label>Estado</label><select id="c-estado"><option value="Activo">Activo</option><option value="Suspendido">Suspendido</option><option value="Terminado">Terminado</option></select></div>
+          </div>
+          <div class="form-group"><label>Supervisores (Interventores)</label><div id="c-interventores-checklist" class="checkbox-group"></div></div>
+          <button type="submit">Guardar Contrato</button>
+          <button type="button" class="btn-sec" onclick="navigateTo('dashboard')">Cancelar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 4. ACTA FORM -->
+    <section id="sec-acta-form" class="hidden form-wrapper">
+      <div class="card">
+        <h2 style="margin-bottom:24px;">Registrar Acta de Supervisión</h2>
+        <form id="form-acta" onsubmit="submitActaForm(event)">
+          <input type="hidden" id="acta-contrato-id">
+          <div class="form-group"><label>Contrato</label><input type="text" id="acta-contrato-num" readonly style="background-color: var(--card-bg);"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Supervisor</label><select id="acta-interventor-id" required><option value="">Seleccione...</option></select></div>
+            <div class="form-group"><label>Fecha</label><input type="date" id="acta-fecha" required></div>
+          </div>
+          <div class="form-group"><label>Descripción</label><textarea id="acta-descripcion" rows="4" required></textarea></div>
+          <div class="form-group"><label>Porcentaje de Avance (%)</label><input type="number" step="0.1" id="acta-avance" required min="0" max="100"></div>
+          <button type="submit">Registrar Acta</button>
+          <button type="button" class="btn-sec" onclick="navigateTo('dashboard')">Cancelar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 5. SEGUIMIENTO FORM -->
+    <section id="sec-seguimiento-form" class="hidden form-wrapper">
+      <div class="card">
+        <h2 style="margin-bottom:24px;">Registrar Seguimiento Técnico-Financiero</h2>
+        <form id="form-seguimiento" onsubmit="submitSeguimientoForm(event)">
+          <input type="hidden" id="seg-contrato-id">
+          <div class="form-group"><label>Contrato</label><input type="text" id="seg-contrato-num" readonly style="background-color: var(--card-bg);"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Fecha</label><input type="date" id="seg-fecha" required></div>
+            <div class="form-group"><label>Estado</label><select id="seg-estado" required><option value="Activo">Activo</option><option value="Suspendido">Suspendido</option><option value="Terminado">Terminado</option></select></div>
+          </div>
+          <div class="form-group"><label>Notas</label><textarea id="seg-notas" rows="3" required></textarea></div>
+          <div class="form-row">
+            <div class="form-group"><label>Avance Acumulado (%)</label><input type="number" step="0.1" id="seg-avance" required min="0" max="100"></div>
+            <div class="form-group"><label>Saldo Financiero Disponible (COP)</label><input type="number" id="seg-saldo" required></div>
+          </div>
+          <button type="submit">Actualizar Seguimiento</button>
+          <button type="button" class="btn-sec" onclick="navigateTo('dashboard')">Cancelar</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- 6. REPORTS -->
+    <section id="sec-reports" class="hidden">
+      <div class="print-btn-container"><button onclick="window.print()">Imprimir Reporte</button></div>
+      <div class="card" id="print-area">
+        <h2 style="margin-bottom:8px;">Consolidado de Contratación y Supervisión</h2>
+        <p style="color: var(--text-muted); margin-bottom:24px; font-size:14px;">Generado: <span id="report-timestamp"></span></p>
+        <div class="metrics-grid" style="margin-bottom:40px;">
+          <div class="metric-card" style="border: 1px solid var(--border);"><h3>Presupuesto Asignado</h3><div class="val" id="rep-total-budget">$0</div></div>
+          <div class="metric-card" style="border: 1px solid var(--border);"><h3>Presupuesto Ejecutado</h3><div class="val" id="rep-total-executed">$0</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Contrato</th><th>Contratista</th><th>Objeto</th><th>Estado</th><th>Progreso</th><th>Saldo</th><th>Supervisores</th></tr></thead>
+          <tbody id="report-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 7. AUDIT -->
+    <section id="sec-audit" class="hidden">
+      <div class="card">
+        <h2 style="margin-bottom:20px;">Registro de Auditoría de Mutaciones</h2>
+        <table>
+          <thead><tr><th>ID</th><th>Usuario</th><th>Tabla Afectada</th><th>Registro ID</th><th>Acción</th><th>Fecha y Hora</th></tr></thead>
+          <tbody id="audit-table-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const API_BASE = '/api';
+    async function apiFetch(path, options = {}) {
+      const token = localStorage.getItem('token');
+      options.headers = { 'Content-Type': 'application/json', ...options.headers };
+      if (token) options.headers['Authorization'] = `Bearer ${token}`;
+      const res = await fetch(API_BASE + path, options);
+      if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
+      return res;
+    }
+    function showSection(id) {
+      ['sec-login', 'sec-dashboard', 'sec-contract-form', 'sec-acta-form', 'sec-seguimiento-form', 'sec-reports', 'sec-audit'].forEach(s => document.getElementById(s).classList.add('hidden'));
+      document.getElementById('sec-' + id).classList.remove('hidden');
+      ['nav-dash', 'nav-contract', 'nav-reports', 'nav-audit'].forEach(n => document.getElementById(n)?.classList.remove('active'));
+      const activeNav = document.getElementById('nav-' + (id === 'contract-form' ? 'contract' : id));
+      if (activeNav) activeNav.classList.add('active');
+    }
+    function navigateTo(route) {
+      if (!localStorage.getItem('token')) { showSection('login'); return; }
+      showSection(route);
+      if (route === 'dashboard') loadDashboard();
+      if (route === 'reports') loadReports();
+      if (route === 'audit') loadAudit();
+      if (route === 'contract-form') {
+        document.getElementById('c-id').value = '';
+        document.getElementById('form-contract').reset();
+        document.getElementById('form-contract-title').textContent = "Registrar Nuevo Contrato";
+      }
+    }
+    async function handleLogin(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('login-error');
+      errEl.classList.add('hidden');
+      try {
+        const res = await fetch(API_BASE + '/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: document.getElementById('username').value, password: document.getElementById('password').value })
+        });
+        const data = await res.json();
+        if (res.status !== 200) { errEl.textContent = data.detail || 'Error'; errEl.classList.remove('hidden'); return; }
+        localStorage.setItem('token', data.token);
+        document.getElementById('app-header').classList.remove('hidden');
+        navigateTo('dashboard');
+      } catch (err) { errEl.textContent = 'Error de conexión'; errEl.classList.remove('hidden'); }
+    }
+    function logout() {
+      localStorage.removeItem('token');
+      document.getElementById('app-header').classList.add('hidden');
+      showSection('login');
+    }
+    async function loadDashboard() {
+      try {
+        const res = await apiFetch('/contratos');
+        const contratos = await res.json();
+        let budget = 0, progress = 0, tbody = document.getElementById('contracts-table-body');
+        tbody.innerHTML = '';
+        contratos.forEach(c => {
+          budget += c.valor_total;
+          progress += c.porcentaje_avance;
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="font-weight:500;">${c.numero}</td>
+            <td>${c.contratista}</td>
+            <td>$${c.valor_total.toLocaleString('es-CO')}</td>
+            <td><div>${c.porcentaje_avance}%</div><div class="progress-bar-container"><div class="progress-bar" style="width: ${c.porcentaje_avance}%"></div></div></td>
+            <td><span class="badge badge-${c.estado.toLowerCase()}">${c.estado}</span></td>
+            <td style="font-size:13px; color:var(--text-muted);">${c.interventores.map(i=>i.nombre).join(', ')||'Sin asignar'}</td>
+            <td>
+              <button onclick="openActaForm(${c.id}, '${c.numero}')" style="padding:6px 12px; font-size:12px;">Acta</button>
+              <button class="btn-sec" onclick="openSeguimientoForm(${c.id}, '${c.numero}', '${c.estado}', ${c.porcentaje_avance}, ${c.saldo_financiero})" style="padding:6px 12px; font-size:12px; margin-left:4px;">Seguimiento</button>
+              <button onclick="editContract(${c.id})" style="padding:6px 12px; font-size:12px; background-color: var(--warning); margin-left:4px;">Editar</button>
+              <button onclick="deleteContract(${c.id})" style="padding:6px 12px; font-size:12px; background-color: var(--danger); margin-left:4px;">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+        document.getElementById('metric-total-contracts').textContent = contratos.length;
+        document.getElementById('metric-total-budget').textContent = '$' + budget.toLocaleString('es-CO');
+        document.getElementById('metric-avg-progress').textContent = (contratos.length ? (progress / contratos.length).toFixed(1) : 0) + '%';
+        loadInterventoresChecklist();
+      } catch (err) {}
+    }
+    async function loadInterventoresChecklist() {
+      try {
+        const res = await apiFetch('/interventores');
+        const supervisors = await res.json();
+        const container = document.getElementById('c-interventores-checklist');
+        container.innerHTML = '';
+        supervisors.forEach(s => {
+          const item = document.createElement('div');
+          item.className = 'checkbox-item';
+          item.innerHTML = `<input type="checkbox" name="interventor_id" value="${s.id}"> <span>${s.nombre} (${s.profesion})</span>`;
+          container.appendChild(item);
+        });
+        const select = document.getElementById('acta-interventor-id');
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        supervisors.forEach(s => { select.innerHTML += `<option value="${s.id}">${s.nombre}</option>`; });
+      } catch (err) {}
+    }
+    async function submitContractForm(e) {
+      e.preventDefault();
+      const ids = Array.from(document.querySelectorAll('input[name="interventor_id"]:checked')).map(cb => parseInt(cb.value));
+      const id = document.getElementById('c-id').value;
+      const payload = {
+        numero: document.getElementById('c-numero').value,
+        contratista: document.getElementById('c-contratista').value,
+        objeto: document.getElementById('c-objeto').value,
+        fecha_inicio: document.getElementById('c-inicio').value,
+        fecha_fin: document.getElementById('c-fin').value,
+        valor_total: parseFloat(document.getElementById('c-valor').value),
+        estado: document.getElementById('c-estado').value,
+        interventor_ids: ids
+      };
+      try {
+        const url = id ? '/contratos/' + id : '/contratos';
+        const method = id ? 'PUT' : 'POST';
+        const res = await apiFetch(url, { method: method, body: JSON.stringify(payload) });
+        if (res.status === 201 || (id && res.ok)) { document.getElementById('form-contract').reset(); navigateTo('dashboard'); }
+        else { alert('Error al guardar contrato'); }
+      } catch (err) { alert(err.message); }
+    }
+    function openActaForm(id, numero) {
+      document.getElementById('acta-contrato-id').value = id;
+      document.getElementById('acta-contrato-num').value = numero;
+      document.getElementById('acta-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('acta-descripcion').value = '';
+      document.getElementById('acta-avance').value = '';
+      showSection('acta-form');
+    }
+    async function submitActaForm(e) {
+      e.preventDefault();
+      const payload = {
+        contrato_id: parseInt(document.getElementById('acta-contrato-id').value),
+        interventor_id: parseInt(document.getElementById('acta-interventor-id').value),
+        fecha: document.getElementById('acta-fecha').value,
+        descripcion: document.getElementById('acta-descripcion').value,
+        porcentaje_avance: parseFloat(document.getElementById('acta-avance').value)
+      };
+      try {
+        const res = await apiFetch('/actas', { method: 'POST', body: JSON.stringify(payload) });
+        if (res.ok) navigateTo('dashboard');
+        else alert('Error al registrar acta');
+      } catch (err) { alert(err.message); }
+    }
+    function openSeguimientoForm(id, numero, estado, avance, saldo) {
+      document.getElementById('seg-contrato-id').value = id;
+      document.getElementById('seg-contrato-num').value = numero;
+      document.getElementById('seg-fecha').value = new Date().toISOString().split('T')[0];
+      document.getElementById('seg-estado').value = estado;
+      document.getElementById('seg-avance').value = avance;
+      document.getElementById('seg-saldo').value = saldo;
+      document.getElementById('seg-notas').value = '';
+      showSection('seguimiento-form');
+    }
+    async function submitSeguimientoForm(e) {
+      e.preventDefault();
+      const id = document.getElementById('seg-contrato-id').value;
+      const payload = {
+        estado: document.getElementById('seg-estado').value,
+        porcentaje_avance: parseFloat(document.getElementById('seg-avance').value),
+        saldo_financiero: parseFloat(document.getElementById('seg-saldo').value),
+        notas: document.getElementById('seg-notas').value,
+        fecha: document.getElementById('seg-fecha').value
+      };
+      try {
+        const res = await apiFetch('/seguimiento/' + id, { method: 'PUT', body: JSON.stringify(payload) });
+        if (res.ok) navigateTo('dashboard');
+        else alert('Error al actualizar seguimiento');
+      } catch (err) { alert(err.message); }
+    }
+    async function loadReports() {
+      try {
+        const res = await apiFetch('/reportes');
+        const report = await res.json();
+        document.getElementById('report-timestamp').textContent = new Date().toLocaleString();
+        document.getElementById('rep-total-budget').textContent = '$' + report.totals.presupuesto.toLocaleString('es-CO');
+        document.getElementById('rep-total-executed').textContent = '$' + report.totals.ejecutado.toLocaleString('es-CO');
+        const tbody = document.getElementById('report-table-body');
+        tbody.innerHTML = '';
+        report.items.forEach(item => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="font-weight:500;">${item.contrato}</td>
+            <td>${item.contratista}</td>
+            <td style="font-size:13px; max-width:250px;">${item.objeto}</td>
+            <td><span class="badge badge-${item.estado.toLowerCase()}">${item.estado}</span></td>
+            <td>${item.progreso}%</td>
+            <td>$${item.saldo.toLocaleString('es-CO')}</td>
+            <td style="font-size:13px;">${item.interventores.join(', ') || 'Ninguno'}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (err) {}
+    }
+    async function loadAudit() {
+      try {
+        const res = await apiFetch('/audit-logs');
+        const logs = await res.json();
+        const tbody = document.getElementById('audit-table-body');
+        tbody.innerHTML = '';
+        logs.forEach(l => {
+          const actionClass = l.accion === 'CREATE' ? 'badge-activo' : (l.accion === 'UPDATE' ? 'badge-suspendido' : 'badge-terminado');
+          tbody.innerHTML += `<tr><td>${l.id}</td><td>${l.usuario||'Sistema'}</td><td>${l.tabla}</td><td>${l.registro_id}</td><td><span class="badge ${actionClass}">${l.accion}</span></td><td>${l.timestamp}</td></tr>`;
+        });
+      } catch (err) {}
+    }
+    async function editContract(id) {
+      try {
+        const res = await apiFetch('/contratos/' + id);
+        const c = await res.json();
+        document.getElementById('c-id').value = c.id;
+        document.getElementById('c-numero').value = c.numero;
+        document.getElementById('c-contratista').value = c.contratista;
+        document.getElementById('c-objeto').value = c.objeto;
+        document.getElementById('c-inicio').value = c.fecha_inicio;
+        document.getElementById('c-fin').value = c.fecha_fin;
+        document.getElementById('c-valor').value = c.valor_total;
+        document.getElementById('c-estado').value = c.estado;
+        await loadInterventoresChecklist();
+        const assignedIds = c.interventores.map(i => i.id);
+        document.querySelectorAll('input[name="interventor_id"]').forEach(cb => { cb.checked = assignedIds.includes(parseInt(cb.value)); });
+        document.getElementById('form-contract-title').textContent = "Editar Contrato";
+        showSection('contract-form');
+      } catch (err) {}
+    }
+    async function deleteContract(id) {
+      if (!confirm('¿Está seguro de eliminar este contrato?')) return;
+      try {
+        const res = await apiFetch('/contratos/' + id, { method: 'DELETE' });
+        if (res.ok) loadDashboard();
+        else alert('Error al eliminar contrato');
+      } catch (err) { alert(err.message); }
+    }
+    window.addEventListener('DOMContentLoaded', () => {
+      if (localStorage.getItem('token')) { document.getElementById('app-header').classList.remove('hidden'); navigateTo('dashboard'); }
+      else { showSection('login'); }
+    });
+  </script>
+</body>
+</html>
