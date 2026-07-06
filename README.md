@@ -3,7 +3,7 @@
 A 5-agent SDLC pipeline that built a SENA interventoría management web app end-to-end. Built for the Kaggle AI Agents Capstone (Business Track).
 
 ## Live Demo
-- URL: [PASTE YOUR CLOUD RUN URL HERE]
+- URL: 
 - Login: `admin` / `admin`
 
 ## Local Setup
